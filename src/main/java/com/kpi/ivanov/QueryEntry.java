@@ -3,6 +3,13 @@ package com.kpi.ivanov;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Represents a query record (D)
+ * Field toDate optional field and getter method return Optional type
+ * Service and question fields have special value "*" and to represent
+ * this value used Optional type that returns with getters.
+ * Special value "*" it means query match all services/question types
+ */
 public final class QueryEntry {
     private Service service;
     private Question question;
@@ -10,6 +17,9 @@ public final class QueryEntry {
     private LocalDate fromDate;
     private LocalDate toDate;
 
+    /**
+     * Builder for creating instance of QueryEntry class
+     */
     public static class Builder {
         private Service service;
         private Question question;
@@ -55,6 +65,10 @@ public final class QueryEntry {
         this.toDate = builder.toDate;
     }
 
+    /**
+     * If service contains null value it means that special value present
+     * @return Optional view of service
+     */
     Optional<Service> getService() {
         if (service == null) {
             return Optional.empty();
@@ -63,6 +77,10 @@ public final class QueryEntry {
         return Optional.of(service);
     }
 
+    /**
+     * If service contains null value it means that special value present
+     * @return Optional view of question
+     */
     Optional<Question> getQuestion() {
         if (question == null) {
             return Optional.empty();
@@ -79,6 +97,10 @@ public final class QueryEntry {
         return fromDate;
     }
 
+    /**
+     * If service contains null value it means that special value present
+     * @return Optional view of toDate
+     */
     Optional<LocalDate> getToDate() {
         if (toDate == null) {
             return Optional.empty();

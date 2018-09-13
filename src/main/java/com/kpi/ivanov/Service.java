@@ -2,6 +2,10 @@ package com.kpi.ivanov;
 
 import java.util.Objects;
 
+/**
+ * Represents a service
+ * Service has two fields type and variation, variation can be optional
+ */
 public final class Service {
     private final int type;
     private final Integer variation;

@@ -4,6 +4,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a response record (C)
+ * Field id added for correct work of set,
+ * to prevent appearing of same objects
+ */
 public final class ResponseEntry {
     private static int ID = 1;
 
@@ -73,6 +78,9 @@ public final class ResponseEntry {
         return Objects.hash(service, question, responseType, date, responseTime, id);
     }
 
+    /**
+     * Builder for creating instance of ResponseEntry class
+     */
     public static class Builder {
         private Service service;
         private Question question;

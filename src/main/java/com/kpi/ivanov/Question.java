@@ -2,6 +2,10 @@ package com.kpi.ivanov;
 
 import java.util.Objects;
 
+/**
+ * Represents a question
+ * Question has two fields type and QuestionCategory, questionCategory can be optional
+ */
 public final class Question {
     private int type;
     private QuestionCategory questionCategory;
@@ -21,6 +25,11 @@ public final class Question {
         this.questionCategory = new QuestionCategory(category, subCategory);
     }
 
+    /**
+     * Method that check matching of two question
+     * @param question QueryEntry question
+     * @return true if question is matches this obj.question
+     */
     boolean isMatches(Question question) {
         if (question.questionCategory == null) {
             return type == question.type;
@@ -58,6 +67,10 @@ public final class Question {
         return Objects.hash(type, questionCategory);
     }
 
+    /**
+     * Represents a question category
+     * Question category has two fields type and subCategory, subCategory can be optional
+     */
     public static class QuestionCategory {
         private int category;
         private Integer subCategory;
@@ -72,6 +85,11 @@ public final class Question {
             this.subCategory = null;
         }
 
+        /**
+         * Method that check matching of two questionCategory
+         * @param questionCategory QueryEntry questionCategory
+         * @return true if questionCategory is matches this obj.questionCategory
+         */
         boolean isMatches(QuestionCategory questionCategory) {
             if (questionCategory.subCategory == null) {
                 return category == questionCategory.category;
@@ -102,6 +120,11 @@ public final class Question {
             }
 
             return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(category, subCategory);
         }
     }
 }

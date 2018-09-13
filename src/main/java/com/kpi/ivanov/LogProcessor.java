@@ -12,6 +12,15 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Represent handler of query records
+ * Contains variable fields in, out and function
+ * in - represent input stream, it can be file, console etc.
+ * out - represent output stream, it can be file, console etc.
+ * function - represent function for handle query records.
+ * Using Functional Interface allow user to create custom algorithms of handling.
+ * For example user can designed function for counting number of response records
+ */
 public class LogProcessor {
     private static final String QUERY_RECORD = "D";
     private static final String RESPONSE_RECORD = "C";
@@ -33,6 +42,9 @@ public class LogProcessor {
         queryEngine = new QueryEngine();
     }
 
+    /**
+     * Method for handling input date and create output date
+     */
     public void process() {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
@@ -196,7 +208,6 @@ public class LogProcessor {
     }
 
     private LocalDate createDate(String token) {
-
         String[] numbers = token.split("\\.");
         if (numbers[0].length() == 1) {
             token = "0" + token;
