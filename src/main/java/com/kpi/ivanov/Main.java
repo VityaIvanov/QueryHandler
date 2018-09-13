@@ -8,10 +8,12 @@ import java.time.Duration;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * Main class
+ */
 public class Main {
     public static void main(String[] args) {
         Function<Set<ResponseEntry>, String> function = (responseEntries) -> {
-
             if (responseEntries.size() == 0) {
                 return "-";
             }
