@@ -4,58 +4,14 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 /**
- * Represents a query record (D)
- * Field toDate optional field and getter method return Optional type
- * Service and question fields have special value "*" and to represent
- * this value used Optional type that returns with getters.
- * Special value "*" it means query match all services/question types
+ * Query for customer response records.
  */
-public final class QueryEntry {
-    private Service service;
-    private Question question;
-    private ResponseType responseType;
-    private LocalDate fromDate;
-    private LocalDate toDate;
-
-    /**
-     * Builder for creating instance of QueryEntry class
-     */
-    public static class Builder {
-        private Service service;
-        private Question question;
-        private ResponseType responseType;
-        private LocalDate fromDate;
-        private LocalDate toDate;
-
-        public Builder setService(Service service) {
-            this.service = service;
-            return this;
-        }
-
-        public Builder setQuestion(Question question) {
-            this.question = question;
-            return this;
-        }
-
-        public Builder setResponseType(ResponseType responseType) {
-            this.responseType = responseType;
-            return this;
-        }
-
-        public Builder setFromDate(LocalDate fromDate) {
-            this.fromDate = fromDate;
-            return this;
-        }
-
-        public Builder setToDate(LocalDate toDate) {
-            this.toDate = toDate;
-            return this;
-        }
-
-        public QueryEntry build() {
-            return new QueryEntry(this);
-        }
-    }
+final class QueryEntry {
+    private final Service service;
+    private final Question question;
+    private final ResponseType responseType;
+    private final LocalDate fromDate;
+    private final LocalDate toDate;
 
     private QueryEntry(Builder builder) {
         this.service = builder.service;
@@ -63,30 +19,6 @@ public final class QueryEntry {
         this.responseType = builder.responseType;
         this.fromDate = builder.fromDate;
         this.toDate = builder.toDate;
-    }
-
-    /**
-     * If service contains null value it means that special value present
-     * @return Optional view of service
-     */
-    Optional<Service> getService() {
-        if (service == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(service);
-    }
-
-    /**
-     * If service contains null value it means that special value present
-     * @return Optional view of question
-     */
-    Optional<Question> getQuestion() {
-        if (question == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(question);
     }
 
     ResponseType getResponseType() {
@@ -97,15 +29,62 @@ public final class QueryEntry {
         return fromDate;
     }
 
-    /**
-     * If service contains null value it means that special value present
-     * @return Optional view of toDate
-     */
     Optional<LocalDate> getToDate() {
-        if (toDate == null) {
-            return Optional.empty();
+        return Optional.ofNullable(toDate);
+    }
+
+    boolean isMatches(ResponseEntry responseEntry) {
+        boolean isServiceMatches = true;
+        boolean isQuestionMatches = true;
+
+        if (service != null) {
+            isServiceMatches = responseEntry.getService().isMatches(service);
         }
 
-        return Optional.of(toDate);
+        if (question != null) {
+            isQuestionMatches = responseEntry.getQuestion().isMatches(question);
+        }
+
+        return isServiceMatches && isQuestionMatches;
+    }
+
+    /**
+     * Builder for QueryEntry.
+     */
+    static class Builder {
+        private Service service;
+        private Question question;
+        private ResponseType responseType;
+        private LocalDate fromDate;
+        private LocalDate toDate;
+
+        Builder setService(Service service) {
+            this.service = service;
+            return this;
+        }
+
+        Builder setQuestion(Question question) {
+            this.question = question;
+            return this;
+        }
+
+        Builder setResponseType(ResponseType responseType) {
+            this.responseType = responseType;
+            return this;
+        }
+
+        Builder setFromDate(LocalDate fromDate) {
+            this.fromDate = fromDate;
+            return this;
+        }
+
+        Builder setToDate(LocalDate toDate) {
+            this.toDate = toDate;
+            return this;
+        }
+
+        QueryEntry build() {
+            return new QueryEntry(this);
+        }
     }
 }

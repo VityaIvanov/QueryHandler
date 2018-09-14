@@ -1,10 +1,8 @@
 package com.kpi.ivanov;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.time.Duration;
+import java.io.*;
+import java.util.List;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -12,32 +10,30 @@ import java.util.function.Function;
  * Main class
  */
 public class Main {
+
+    private static Function<Set<ResponseEntry>, String> function = responseEntries -> {
+        OptionalDouble averageTime = responseEntries.stream()
+                .mapToDouble(entry -> entry.getResponseTime().toMinutes()).average();
+
+        if (!averageTime.isPresent()) {
+            return "-";
+        }
+
+        return Long.toString(Math.round(averageTime.getAsDouble()));
+    };
+
     public static void main(String[] args) {
-        Function<Set<ResponseEntry>, String> function = (responseEntries) -> {
-            if (responseEntries.size() == 0) {
-                return "-";
+        try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File("src/main/resources/statistics"))))) {
+            List<String> results = new LogProcessor(function).process(new FileInputStream(new File("src/main/resources/records")));
+
+            for (String result: results) {
+                writer.write(result);
+                writer.newLine();
             }
-
-            Duration duration = Duration.ofMinutes(0);
-            for (ResponseEntry responseEntry: responseEntries) {
-                duration = duration.plusMinutes(responseEntry.getResponseTime().toMinutes());
-            }
-
-            duration = duration.dividedBy(responseEntries.size());
-
-            return  Integer.toString((int) duration.toMinutes());
-        };
-
-        LogProcessor logProcessor;
-        try {
-            logProcessor = new LogProcessor(
-                    new FileInputStream(new File("src/main/resources/records")),
-                    new FileOutputStream(new File("src/main/resources/statistics")),
-                    function);
-
-            logProcessor.process();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
     }
 }

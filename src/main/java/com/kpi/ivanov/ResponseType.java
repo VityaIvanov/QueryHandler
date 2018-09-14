@@ -1,11 +1,16 @@
 package com.kpi.ivanov;
 
 /**
- * Enumeration for representing response type
- * FIRST_ANSWER corresponds to P
- * NEXT_ANSWER corresponds to N
+ * Enumeration for representing response type.
  */
-public enum ResponseType {
+enum ResponseType {
+    /**
+     * FIRST_ANSWER given by webhosting customers.
+     */
     FIRST_ANSWER,
+
+    /**
+     * NEXT_ANSWER given by webhosting customers.
+     */
     NEXT_ANSWER
 }

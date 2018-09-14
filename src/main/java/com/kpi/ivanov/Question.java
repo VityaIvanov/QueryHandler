@@ -1,130 +1,63 @@
 package com.kpi.ivanov;
 
-import java.util.Objects;
-
 /**
- * Represents a question
- * Question has two fields type and QuestionCategory, questionCategory can be optional
+ * Customers support question.
  */
-public final class Question {
+final class Question {
     private int type;
     private QuestionCategory questionCategory;
 
-    public Question(int type) {
-        this.type = type;
-        this.questionCategory = null;
+    Question(int type) {
+        this(type, null);
     }
 
-    public Question(int type, int category) {
+    Question(int type, QuestionCategory questionCategory) {
+        if (type <= 0 || type > 10) {
+            throw new RuntimeException("Invalid value for question type " + type);
+        }
+
         this.type = type;
-        this.questionCategory = new QuestionCategory(category);
+        this.questionCategory = questionCategory;
     }
 
-    public Question(int type, int category, int subCategory) {
-        this.type = type;
-        this.questionCategory = new QuestionCategory(category, subCategory);
-    }
-
-    /**
-     * Method that check matching of two question
-     * @param question QueryEntry question
-     * @return true if question is matches this obj.question
-     */
     boolean isMatches(Question question) {
-        if (question.questionCategory == null) {
-            return type == question.type;
-        }
-
-        if (questionCategory != null) {
-            return type == question.type &&
-                    questionCategory.isMatches(question.questionCategory);
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Question)) {
-            return false;
-        }
-
-        Question question = (Question) obj;
-
-        if (this.questionCategory != null && question.questionCategory != null) {
-            return this.type == question.type && this.questionCategory.equals(question.questionCategory);
-        }
-
-        if (this.questionCategory == null && question.questionCategory == null) {
-            return this.type == question.type;
-        }
-
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, questionCategory);
+        return type == question.type &&
+                (question.questionCategory == null
+                        || questionCategory == null
+                        || questionCategory.isMatches(question.questionCategory));
     }
 
     /**
-     * Represents a question category
-     * Question category has two fields type and subCategory, subCategory can be optional
+     * Customers support question category.
      */
-    public static class QuestionCategory {
+    static final class QuestionCategory {
         private int category;
         private Integer subCategory;
 
-        QuestionCategory(int category, int subCategory) {
-            this.category = category;
-            this.subCategory = subCategory;
-        }
-
         QuestionCategory(int category) {
+            if (category <= 0 || category > 20) {
+                throw new RuntimeException("Invalid value for question category " + category);
+            }
             this.category = category;
             this.subCategory = null;
         }
 
-        /**
-         * Method that check matching of two questionCategory
-         * @param questionCategory QueryEntry questionCategory
-         * @return true if questionCategory is matches this obj.questionCategory
-         */
+        QuestionCategory(int category, int subCategory) {
+            if (category <= 0 || category > 20) {
+                throw new RuntimeException("Invalid value for question category " + category);
+            }
+
+            if (subCategory <= 0 || subCategory > 5) {
+                throw new RuntimeException("Invalid value for question subCategory " + subCategory);
+            }
+
+            this.category = category;
+            this.subCategory = subCategory;
+        }
+
         boolean isMatches(QuestionCategory questionCategory) {
-            if (questionCategory.subCategory == null) {
-                return category == questionCategory.category;
-            }
-
-            if (subCategory != null) {
-                return category == questionCategory.category &&
-                        subCategory.equals(questionCategory.subCategory);
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof QuestionCategory)) {
-                return false;
-            }
-
-            QuestionCategory questionCategory = (QuestionCategory) obj;
-
-            if (this.subCategory != null && questionCategory.subCategory != null) {
-                return this.category == questionCategory.category && this.subCategory.equals(questionCategory.subCategory);
-            }
-
-            if (this.subCategory == null && questionCategory.subCategory == null) {
-                return this.category == questionCategory.category;
-            }
-
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(category, subCategory);
+            return category == questionCategory.category &&
+                    (questionCategory.subCategory == null || questionCategory.subCategory.equals(subCategory));
         }
     }
 }
