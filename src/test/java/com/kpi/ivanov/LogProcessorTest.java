@@ -1,16 +1,17 @@
 package com.kpi.ivanov;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -35,7 +36,6 @@ public class LogProcessorTest {
     private File in;
     private File out;
     private File answer;
-    private Handler handler;
 
     public LogProcessorTest(File in, File out, File answer) {
         this.in = in;
@@ -43,14 +43,15 @@ public class LogProcessorTest {
         this.answer = answer;
     }
 
-    @Before
-    public void setIn() {
-        handler = new Handler();
-    }
 
     @Test
     public void test() throws IOException {
-        handler.process(in, out);
+        try {
+            logProcessor.process(new FileInputStream(in), new FileOutputStream(out));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         byte[] f1 = Files.readAllBytes(out.toPath());
         byte[] f2 = Files.readAllBytes(answer.toPath());
 
@@ -78,20 +79,5 @@ public class LogProcessorTest {
                                 new File("src/main/resources/answers/rightAnswer4")}
                 }
         );
-    }
-
-    private static class Handler {
-        void process(File in, File out) {
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out)))) {
-                List<String> results = logProcessor.process(new FileInputStream(in));
-
-                for (String result : results) {
-                    writer.write(result);
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

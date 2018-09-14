@@ -1,10 +1,17 @@
 package com.kpi.ivanov;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -14,6 +21,9 @@ import java.util.stream.Collectors;
 final class LogProcessor {
     private static final String QUERY_RECORD = "D";
     private static final String RESPONSE_RECORD = "C";
+
+    private static final String FIRST_ANSWER = "P";
+    private static final String NEXT_ANSWER = "N";
 
     private static final int NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD = 6;
     private static final int NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD = 5;
@@ -26,12 +36,13 @@ final class LogProcessor {
         this.resultComputer = resultComputer;
     }
 
-    List<String> process(InputStream in) throws IOException {
-        List<String> result = new ArrayList<>();
+    void process(InputStream in, OutputStream out){
         ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            int numOfRecords = parseCountOfRecords(reader.readLine());
-            for (int i = 0; i < numOfRecords; i++) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
+
+            int countOfRecords = parseCountOfRecords(reader.readLine());
+            for (int i = 0; i < countOfRecords; i++) {
                 String record = reader.readLine();
 
                 if (record == null) {
@@ -39,26 +50,32 @@ final class LogProcessor {
                 }
 
                 List<String> tokens = splitToTokens(record);
-                if (tokens.get(0).equals(QUERY_RECORD)) {
-                    result.add(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
-                } else {
+                if (isQueryRecord(tokens.get(0))) {
+                    writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
+                    writer.newLine();
+                } else if (isResponseRecord(tokens.get(0))) {
                     responsesQueryEngine.add(parseResponseEntry(tokens));
+                } else {
+                    throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
                 }
             }
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
+    }
 
-        return result;
+    private static boolean isQueryRecord(String token) {
+        return token.equals(QUERY_RECORD);
+    }
+
+    private static boolean isResponseRecord(String token) {
+        return token.equals(RESPONSE_RECORD);
     }
 
     private static int parseCountOfRecords(String record) {
-        if (record == null) {
-            throw new RuntimeException("Empty input stream");
-        }
-
         int numOfRecords = Integer.parseInt(record);
-
         if (numOfRecords < 0) {
-            throw new RuntimeException("Number of records must be positive " + record);
+            throw new RuntimeException("Records counter must be positive " + record);
         }
 
         return numOfRecords;
@@ -67,7 +84,7 @@ final class LogProcessor {
     private static QueryEntry parseQueryEntry(List<String> tokens) {
         try {
             if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD) {
-                throw new IllegalArgumentException("Invalid query record " + tokens);
+                throw new RuntimeException("Invalid query record" + tokens);
             }
 
             QueryEntry.Builder builder = new QueryEntry.Builder().
@@ -81,7 +98,7 @@ final class LogProcessor {
                 builder.setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))));
             }
 
-            List<LocalDate> period = createDates(tokens.get(4));
+            List<LocalDate> period = parseDates(tokens.get(4));
             builder.setFromDate(period.get(0));
 
             if (period.size() == 2) {
@@ -97,11 +114,7 @@ final class LogProcessor {
     private static ResponseEntry parseResponseEntry(List<String> tokens) {
         try {
             if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD) {
-                throw new IllegalArgumentException("Invalid response record " + tokens);
-            }
-
-            if (!tokens.get(0).equals(RESPONSE_RECORD)) {
-                throw new RuntimeException("Invalid symbol " + tokens.get(0) + " in " + tokens);
+                throw new RuntimeException("Invalid response record " + tokens);
             }
 
             return new ResponseEntry.Builder()
@@ -117,50 +130,44 @@ final class LogProcessor {
     }
 
     private static Service parseService(List<Integer> numbers) {
-        if (numbers.size() > 2) {
-            throw new IllegalArgumentException("To much elements for service" + numbers);
-        }
-
         if (numbers.size() == 1) {
             return new Service(numbers.get(0));
+        } else if (numbers.size() == 2) {
+            return new Service(numbers.get(0), numbers.get(1));
         }
 
-        return new Service(numbers.get(0), numbers.get(1));
+        throw new RuntimeException("To much elements for service" + numbers);
     }
 
     private static Question parseQuestion(List<Integer> numbers) {
-        if (numbers.size() > 3) {
-            throw new IllegalArgumentException("To much elements for question" + numbers);
-        }
-
         if (numbers.size() == 1) {
             return new Question(numbers.get(0));
-        }
-
-        if (numbers.size() == 2) {
+        } else if (numbers.size() == 2) {
             return new Question(numbers.get(0), new Question.QuestionCategory(numbers.get(1)));
+        } else if (numbers.size() == 3) {
+            return new Question(numbers.get(0), new Question.QuestionCategory(numbers.get(1), numbers.get(2)));
         }
 
-        return new Question(numbers.get(0), new Question.QuestionCategory(numbers.get(1), numbers.get(2)));
+        throw new RuntimeException("To much elements for question" + numbers);
     }
 
     private static ResponseType parseResponseType(String token) {
-        if (token.equals("P")) {
+        if (token.equals(FIRST_ANSWER)) {
             return ResponseType.FIRST_ANSWER;
         }
 
-        if (token.equals("N")) {
+        if (token.equals(NEXT_ANSWER)) {
             return ResponseType.NEXT_ANSWER;
         }
 
-        throw new RuntimeException("Invalid symbol + " + token);
+        throw new RuntimeException("Invalid response type + " + token);
     }
 
     private static Duration parseDuration(String token) {
         return Duration.ofMinutes(Integer.parseInt(token));
     }
 
-    private static List<LocalDate> createDates(String token) {
+    private static List<LocalDate> parseDates(String token) {
         return Arrays.stream(token.split("-")).map(LogProcessor::parseDate).collect(Collectors.toList());
     }
 

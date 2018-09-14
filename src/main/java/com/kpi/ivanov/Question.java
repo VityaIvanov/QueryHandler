@@ -12,12 +12,17 @@ final class Question {
     }
 
     Question(int type, QuestionCategory questionCategory) {
-        if (type <= 0 || type > 10) {
-            throw new RuntimeException("Invalid value for question type " + type);
-        }
+        checkType(type);
 
         this.type = type;
         this.questionCategory = questionCategory;
+    }
+
+    private static void checkType(int type) {
+        if (type < 1 || type > 10) {
+            throw new IllegalArgumentException("Invalid value for question type. " +
+                    "The type can take values from 1 to 10 but not the" + type);
+        }
     }
 
     boolean isMatches(Question question) {
@@ -35,24 +40,32 @@ final class Question {
         private Integer subCategory;
 
         QuestionCategory(int category) {
-            if (category <= 0 || category > 20) {
-                throw new RuntimeException("Invalid value for question category " + category);
-            }
+            checkCategory(category);
+
             this.category = category;
             this.subCategory = null;
         }
 
         QuestionCategory(int category, int subCategory) {
-            if (category <= 0 || category > 20) {
-                throw new RuntimeException("Invalid value for question category " + category);
-            }
-
-            if (subCategory <= 0 || subCategory > 5) {
-                throw new RuntimeException("Invalid value for question subCategory " + subCategory);
-            }
+            checkCategory(category);
+            checkSubCategory(subCategory);
 
             this.category = category;
             this.subCategory = subCategory;
+        }
+
+        private static void checkCategory(int category) {
+            if (category < 1 || category > 20) {
+                throw new IllegalArgumentException("Invalid value for service type. " +
+                        "The type can take values from 1 to 20 but not the" + category);
+            }
+        }
+
+        private static void checkSubCategory(int subCategory) {
+            if (subCategory < 1 || subCategory > 5) {
+                throw new IllegalArgumentException("Invalid value for service type. " +
+                        "The variation can take values from 1 to 5 but not the " + subCategory);
+            }
         }
 
         boolean isMatches(QuestionCategory questionCategory) {
