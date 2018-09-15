@@ -36,7 +36,7 @@ final class LogProcessor {
         this.resultComputer = resultComputer;
     }
 
-    void process(InputStream in, OutputStream out){
+    void process(InputStream in, OutputStream out) {
         ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
@@ -50,10 +50,10 @@ final class LogProcessor {
                 }
 
                 List<String> tokens = splitToTokens(record);
-                if (isQueryRecord(tokens.get(0))) {
+                if (tokens.get(0).equals(QUERY_RECORD)) {
                     writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
                     writer.newLine();
-                } else if (isResponseRecord(tokens.get(0))) {
+                } else if (tokens.get(0).equals(RESPONSE_RECORD)) {
                     responsesQueryEngine.add(parseResponseEntry(tokens));
                 } else {
                     throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
@@ -62,14 +62,6 @@ final class LogProcessor {
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
-    }
-
-    private static boolean isQueryRecord(String token) {
-        return token.equals(QUERY_RECORD);
-    }
-
-    private static boolean isResponseRecord(String token) {
-        return token.equals(RESPONSE_RECORD);
     }
 
     private static int parseCountOfRecords(String record) {
@@ -82,11 +74,11 @@ final class LogProcessor {
     }
 
     private static QueryEntry parseQueryEntry(List<String> tokens) {
-        try {
-            if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD) {
-                throw new RuntimeException("Invalid query record" + tokens);
-            }
+        if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD) {
+            throw new RuntimeException("Invalid query record" + tokens);
+        }
 
+        try {
             QueryEntry.Builder builder = new QueryEntry.Builder().
                     setResponseType(parseResponseType(tokens.get(3)));
 
@@ -106,17 +98,17 @@ final class LogProcessor {
             }
 
             return builder.build();
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Invalid query record " + tokens, e);
+        } catch (RuntimeException exception) {
+            throw new RuntimeException("Invalid query record " + tokens, exception);
         }
     }
 
     private static ResponseEntry parseResponseEntry(List<String> tokens) {
-        try {
-            if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD) {
-                throw new RuntimeException("Invalid response record " + tokens);
-            }
+        if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD) {
+            throw new RuntimeException("Invalid response record " + tokens);
+        }
 
+        try {
             return new ResponseEntry.Builder()
                     .setService(parseService(parseNumericTokens(tokens.get(1))))
                     .setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))))
@@ -124,8 +116,8 @@ final class LogProcessor {
                     .setDate(parseDate(tokens.get(4)))
                     .setDuration(parseDuration(tokens.get(5)))
                     .build();
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Invalid response record " + tokens, e);
+        } catch (RuntimeException exception) {
+            throw new RuntimeException("Invalid response record " + tokens, exception);
         }
     }
 
