@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Handler for processing input date
+ * Handler for processing input date.
  */
 final class LogProcessor {
     private static final String QUERY_RECORD = "D";
