@@ -37,6 +37,10 @@ final class LogProcessor {
         this.resultComputer = resultComputer;
     }
 
+    /**
+     * Input stream is used to handling date without putting it all in computer memory.
+     * Can throw RuntimeException.
+     */
     void process(InputStream in, OutputStream out) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
