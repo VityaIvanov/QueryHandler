@@ -18,18 +18,18 @@ final class Question {
         this.questionCategory = questionCategory;
     }
 
-    private static void checkType(int type) {
-        if (type < 1 || type > 10) {
-            throw new IllegalArgumentException("Invalid value for question type. " +
-                    "The type can take values from 1 to 10 but not the" + type);
-        }
-    }
-
     boolean isMatches(Question question) {
         return type == question.type &&
                 (question.questionCategory == null
                         || questionCategory == null
                         || questionCategory.isMatches(question.questionCategory));
+    }
+
+    private static void checkType(int type) {
+        if (type < 1 || type > 10) {
+            throw new IllegalArgumentException("Invalid value for question type. " +
+                    "The type can take values from 1 to 10 but not the" + type);
+        }
     }
 
     /**
@@ -54,6 +54,11 @@ final class Question {
             this.subCategory = subCategory;
         }
 
+        boolean isMatches(QuestionCategory questionCategory) {
+            return category == questionCategory.category &&
+                    (questionCategory.subCategory == null || questionCategory.subCategory.equals(subCategory));
+        }
+        
         private static void checkCategory(int category) {
             if (category < 1 || category > 20) {
                 throw new IllegalArgumentException("Invalid value for service type. " +
@@ -66,11 +71,6 @@ final class Question {
                 throw new IllegalArgumentException("Invalid value for service type. " +
                         "The variation can take values from 1 to 5 but not the " + subCategory);
             }
-        }
-
-        boolean isMatches(QuestionCategory questionCategory) {
-            return category == questionCategory.category &&
-                    (questionCategory.subCategory == null || questionCategory.subCategory.equals(subCategory));
         }
     }
 }

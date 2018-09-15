@@ -10,15 +10,15 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            new LogProcessor(Main::resultComputer)
+            new LogProcessor(Main::calculateAverageResponseTime)
                     .process(new FileInputStream(new File(args[0])),
                             new FileOutputStream(new File(args[1])));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception exception) {
+            System.out.println("Exception during parsing " + exception);
         }
     }
 
-    private static String resultComputer(Set<ResponseEntry> responseEntries) {
+    private static String calculateAverageResponseTime(Set<ResponseEntry> responseEntries) {
         OptionalDouble averageTime = responseEntries.stream()
                 .mapToDouble(entry -> entry.getResponseTime().toMinutes()).average();
 
