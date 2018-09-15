@@ -2,6 +2,7 @@ package com.kpi.ivanov;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -37,9 +38,9 @@ final class LogProcessor {
     }
 
     void process(InputStream in, OutputStream out) {
-        ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
+            ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
 
             int countOfRecords = parseCountOfRecords(reader.readLine());
             for (int i = 0; i < countOfRecords; i++) {
@@ -50,16 +51,19 @@ final class LogProcessor {
                 }
 
                 List<String> tokens = splitToTokens(record);
-                if (tokens.get(0).equals(QUERY_RECORD)) {
-                    writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
-                    writer.newLine();
-                } else if (tokens.get(0).equals(RESPONSE_RECORD)) {
-                    responsesQueryEngine.add(parseResponseEntry(tokens));
-                } else {
-                    throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
+                switch (tokens.get(0)) {
+                    case QUERY_RECORD:
+                        writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
+                        writer.newLine();
+                        break;
+                    case RESPONSE_RECORD:
+                        responsesQueryEngine.add(parseResponseEntry(tokens));
+                        break;
+                    default:
+                        throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
                 }
             }
-        } catch (Exception exception) {
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
     }
