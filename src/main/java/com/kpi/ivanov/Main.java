@@ -11,8 +11,8 @@ public class Main {
     public static void main(String[] args) {
         try {
             new LogProcessor(Main::resultComputer)
-                    .process(new FileInputStream(new File("src/main/resources/records")),
-                            new FileOutputStream(new File("src/main/resources/statistics")));
+                    .process(new FileInputStream(new File(args[0])),
+                            new FileOutputStream(new File(args[1])));
         } catch (Exception e) {
             e.printStackTrace();
         }
