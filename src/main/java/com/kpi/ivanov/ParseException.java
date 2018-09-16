@@ -9,5 +9,4 @@ final class ParseException extends RuntimeException {
     ParseException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }
