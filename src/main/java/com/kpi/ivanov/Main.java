@@ -11,9 +11,8 @@ import java.util.Set;
 public class Main {
 
     public static void main(String[] args) {
-
-        for (String s: args) {
-            System.out.println(s);
+        if (args.length != 2) {
+            throw new RuntimeException("Invalid number of paths to files. Must be 2 paths to files");
         }
 
         try(InputStream in = Files.newInputStream(Paths.get(args[0]));
@@ -22,7 +21,7 @@ public class Main {
         } catch (RuntimeException exception) {
             System.out.println("Exception during parsing " + exception);
         } catch (IOException exception) {
-            System.out.println("Exception during reading or writing data" + exception);
+            System.out.println("Exception during reading or writing data " + exception);
         }
     }
 
@@ -35,9 +34,5 @@ public class Main {
         }
 
         return Long.toString(Math.round(averageTime.getAsDouble()));
-    }
-
-    private void checkInputingFilesPaths(String[] paths) {
-
     }
 }

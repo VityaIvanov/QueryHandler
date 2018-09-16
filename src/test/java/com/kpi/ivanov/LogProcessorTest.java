@@ -60,8 +60,8 @@ public class LogProcessorTest {
 
             assertArrayEquals(outputStream.toByteArray(), Files.readAllBytes(answer.toPath()));
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            System.out.println("Exception during the test " + exception);
         }
     }
 }

@@ -40,35 +40,46 @@ final class LogProcessor {
     /**
      * Input stream is used to handling date without putting it all in computer memory.
      * Throws RuntimeException in case of IOException or Parsing exception.
+     * Method does not close input and output streams.
      */
-    void process(InputStream in, OutputStream out) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
-            ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
+    void process(InputStream in, OutputStream out) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
-            int countOfRecords = parseCountOfRecords(reader.readLine());
-            for (int i = 0; i < countOfRecords; i++) {
-                String record = reader.readLine();
+        ResponsesQueryEngine responsesQueryEngine = new ResponsesQueryEngine();
 
-                if (record == null) {
-                    throw new RuntimeException("Expected more records");
-                }
+        int countOfRecords = parseCountOfRecords(reader.readLine());
+        for (int i = 0; i < countOfRecords; i++) {
+            processOneRecord(reader, writer, responsesQueryEngine);
+        }
 
-                List<String> tokens = splitToTokens(record);
-                switch (tokens.get(0)) {
-                    case QUERY_RECORD:
-                        writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
-                        writer.newLine();
-                        break;
-                    case RESPONSE_RECORD:
-                        responsesQueryEngine.add(parseResponseEntry(tokens));
-                        break;
-                    default:
-                        throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
-                }
-            }
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
+        writer.flush();
+    }
+
+    /**
+     * Method use customer algorithm that represented by function resultComputer.
+     * That allow customers to create own algorithms to process input date.
+     */
+    private void processOneRecord(BufferedReader reader,
+                                  BufferedWriter writer,
+                                  ResponsesQueryEngine responsesQueryEngine) throws IOException {
+        String record = reader.readLine();
+
+        if (record == null) {
+            throw new RuntimeException("Expected more records");
+        }
+
+        List<String> tokens = splitToTokens(record);
+        switch (tokens.get(0)) {
+            case QUERY_RECORD:
+                writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
+                writer.newLine();
+                break;
+            case RESPONSE_RECORD:
+                responsesQueryEngine.add(parseResponseEntry(tokens));
+                break;
+            default:
+                throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
         }
     }
 

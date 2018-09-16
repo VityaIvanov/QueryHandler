@@ -63,7 +63,7 @@ public class MainTest {
 
             assertArrayEquals(out.toByteArray(), Files.readAllBytes(answer.toPath()));
         } catch (IOException exception) {
-            System.out.println("Exception during the test");
+            System.out.println("Exception during the test " + exception);
         }
     }
 }
