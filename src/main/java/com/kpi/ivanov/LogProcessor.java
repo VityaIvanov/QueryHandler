@@ -80,7 +80,7 @@ final class LogProcessor {
                     throw new ParseException("Invalid record type " + tokens.get(0));
             }
         } catch (ParseException | RuntimeException exception) {
-            throw new ParseException("Invalid record " + record + "\nCause by " + exception.getMessage());
+            throw new ParseException("Invalid record " + record + "\nCaused by " + exception.getMessage());
         }
     }
 
