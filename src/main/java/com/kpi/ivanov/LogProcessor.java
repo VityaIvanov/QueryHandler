@@ -79,7 +79,7 @@ final class LogProcessor {
                 default:
                     throw new ParseException("Invalid record type " + tokens.get(0));
             }
-        } catch (ParseException exception) {
+        } catch (ParseException | RuntimeException exception) {
             throw new ParseException("Invalid record " + record, exception);
         }
     }
