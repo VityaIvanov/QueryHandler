@@ -22,9 +22,9 @@ public class Main {
         } catch (ParseException exception) {
             System.out.println("Exception during parsing " + exception.getMessage());
         } catch (IOException exception) {
-            System.out.println("Exception during reading or writing data " + exception);
+            System.out.println("Exception during reading or writing data " + exception.getMessage());
         } catch (Exception exception) {
-            System.out.println("Unexpected exception" + exception);
+            System.out.println("Unexpected exception" + exception.getMessage());
         }
     }
 
