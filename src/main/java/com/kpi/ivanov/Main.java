@@ -12,7 +12,8 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length != 2) {
-            throw new ParseException("Invalid number of paths to files. Must be 2 paths to files");
+            System.out.println("Invalid number of paths to files. Must be 2 paths to files");
+            return;
         }
 
         try(InputStream in = Files.newInputStream(Paths.get(args[0]));
