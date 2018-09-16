@@ -43,7 +43,7 @@ final class LogProcessor {
      * Throws ParseException in case of Parsing exception.
      * Method does not close input and output streams.
      */
-    void process(InputStream in, OutputStream out) throws IOException {
+    void process(InputStream in, OutputStream out) throws IOException, ParseException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
@@ -59,7 +59,7 @@ final class LogProcessor {
 
     private void processOneRecord(BufferedReader reader,
                                   BufferedWriter writer,
-                                  ResponsesQueryEngine responsesQueryEngine) throws IOException {
+                                  ResponsesQueryEngine responsesQueryEngine) throws IOException, ParseException {
         String record = reader.readLine();
 
         if (record == null) {
@@ -84,7 +84,7 @@ final class LogProcessor {
         }
     }
 
-    private static int parseCountOfRecords(String record) {
+    private static int parseCountOfRecords(String record) throws ParseException {
         int numOfRecords = Integer.parseInt(record);
         if (numOfRecords < 0) {
             throw new ParseException("Records counter must be positive " + record);
@@ -93,7 +93,7 @@ final class LogProcessor {
         return numOfRecords;
     }
 
-    private static QueryEntry parseQueryEntry(List<String> tokens) {
+    private static QueryEntry parseQueryEntry(List<String> tokens) throws ParseException {
         if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD) {
             throw new ParseException("Invalid query record. Number of elements is incorrect. ");
         }
@@ -119,7 +119,7 @@ final class LogProcessor {
         return builder.build();
     }
 
-    private static ResponseEntry parseResponseEntry(List<String> tokens) {
+    private static ResponseEntry parseResponseEntry(List<String> tokens) throws ParseException {
         if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD) {
             throw new ParseException("Invalid response record. Number of elements is incorrect. ");
         }
@@ -133,7 +133,7 @@ final class LogProcessor {
                 .build();
     }
 
-    private static Service parseService(List<Integer> numbers) {
+    private static Service parseService(List<Integer> numbers) throws ParseException {
         if (numbers.size() == 1) {
             return new Service(numbers.get(0));
         } else if (numbers.size() == 2) {
@@ -143,7 +143,7 @@ final class LogProcessor {
         throw new ParseException("To much elements for service " + numbers);
     }
 
-    private static Question parseQuestion(List<Integer> numbers) {
+    private static Question parseQuestion(List<Integer> numbers) throws ParseException {
         if (numbers.size() == 1) {
             return new Question(numbers.get(0));
         } else if (numbers.size() == 2) {
@@ -155,7 +155,7 @@ final class LogProcessor {
         throw new ParseException("To much elements for question " + numbers);
     }
 
-    private static ResponseType parseResponseType(String token) {
+    private static ResponseType parseResponseType(String token) throws ParseException {
         if (token.equals(FIRST_ANSWER)) {
             return ResponseType.FIRST_ANSWER;
         }
