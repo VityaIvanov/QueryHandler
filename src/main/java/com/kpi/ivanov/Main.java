@@ -23,6 +23,8 @@ public class Main {
             System.out.println("Exception during parsing " + exception + "\n" + exception.getCause());
         } catch (IOException exception) {
             System.out.println("Exception during reading or writing data " + exception);
+        } catch (Exception exception) {
+            System.out.println("Exception during reading or writing data " + exception);
         }
     }
 
