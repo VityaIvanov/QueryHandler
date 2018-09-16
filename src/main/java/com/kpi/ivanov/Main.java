@@ -20,7 +20,7 @@ public class Main {
             OutputStream out = Files.newOutputStream(Paths.get(args[1]))){
             new LogProcessor(Main::calculateAverageResponseTime).process(in, out);
         } catch (ParseException exception) {
-            System.out.println("Exception during parsing " + exception);
+            System.out.println("Exception during parsing " + exception.getMessage());
         } catch (IOException exception) {
             System.out.println("Exception during reading or writing data " + exception);
         } catch (Exception exception) {
