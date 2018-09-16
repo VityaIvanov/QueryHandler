@@ -24,7 +24,7 @@ public class Main {
         } catch (IOException exception) {
             System.out.println("Exception during reading or writing data " + exception.getMessage());
         } catch (Exception exception) {
-            System.out.println("Unexpected exception" + exception.getMessage());
+            System.out.println("Unexpected exception " + exception.getMessage());
         }
     }
 
