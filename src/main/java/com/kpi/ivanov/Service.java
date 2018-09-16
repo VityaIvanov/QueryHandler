@@ -31,7 +31,7 @@ final class Service {
     private static void checkType(int type) {
         if (type < 1 || type > 10) {
             throw new IllegalArgumentException("Invalid value for service type. " +
-                    "The type can take values from 1 to 10 but not the" + type);
+                    "The type can take values from 1 to 10 but not the " + type);
         }
     }
 

@@ -17,7 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Handler for processing input date.
+ * Handler for processing input data.
+ * Setting custom algorithm allow customers create own algorithms for handling data.
  */
 final class LogProcessor {
     private static final String QUERY_RECORD = "D";
@@ -38,8 +39,8 @@ final class LogProcessor {
     }
 
     /**
-     * Input stream is used to handling date without putting it all in computer memory.
-     * Throws RuntimeException in case of IOException or Parsing exception.
+     * Input stream is used for handling data without putting it all in computer memory.
+     * Throws ParseException in case of Parsing exception.
      * Method does not close input and output streams.
      */
     void process(InputStream in, OutputStream out) throws IOException {
@@ -56,37 +57,37 @@ final class LogProcessor {
         writer.flush();
     }
 
-    /**
-     * Method use customer algorithm that represented by function resultComputer.
-     * That allow customers to create own algorithms to process input date.
-     */
     private void processOneRecord(BufferedReader reader,
                                   BufferedWriter writer,
                                   ResponsesQueryEngine responsesQueryEngine) throws IOException {
         String record = reader.readLine();
 
         if (record == null) {
-            throw new RuntimeException("Expected more records");
+            throw new ParseException("Expected more records");
         }
 
-        List<String> tokens = splitToTokens(record);
-        switch (tokens.get(0)) {
-            case QUERY_RECORD:
-                writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
-                writer.newLine();
-                break;
-            case RESPONSE_RECORD:
-                responsesQueryEngine.add(parseResponseEntry(tokens));
-                break;
-            default:
-                throw new RuntimeException("Invalid record type " + tokens.get(0) + " in record " + record);
+        try {
+            List<String> tokens = splitToTokens(record);
+            switch (tokens.get(0)) {
+                case QUERY_RECORD:
+                    writer.write(resultComputer.apply(responsesQueryEngine.query(parseQueryEntry(tokens))));
+                    writer.newLine();
+                    break;
+                case RESPONSE_RECORD:
+                    responsesQueryEngine.add(parseResponseEntry(tokens));
+                    break;
+                default:
+                    throw new ParseException("Invalid record type " + tokens.get(0));
+            }
+        } catch (ParseException exception) {
+            throw new ParseException("Invalid record " + record, exception);
         }
     }
 
     private static int parseCountOfRecords(String record) {
         int numOfRecords = Integer.parseInt(record);
         if (numOfRecords < 0) {
-            throw new RuntimeException("Records counter must be positive " + record);
+            throw new ParseException("Records counter must be positive " + record);
         }
 
         return numOfRecords;
@@ -94,50 +95,42 @@ final class LogProcessor {
 
     private static QueryEntry parseQueryEntry(List<String> tokens) {
         if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_QUERY_RECORD) {
-            throw new RuntimeException("Invalid query record" + tokens);
+            throw new ParseException("Invalid query record. Number of elements is incorrect. ");
         }
 
-        try {
-            QueryEntry.Builder builder = new QueryEntry.Builder()
-                    .setResponseType(parseResponseType(tokens.get(3)));
+        QueryEntry.Builder builder = new QueryEntry.Builder()
+                .setResponseType(parseResponseType(tokens.get(3)));
 
-            if (!tokens.get(1).equals("*")) {
-                builder.setService(parseService(parseNumericTokens(tokens.get(1))));
-            }
-
-            if (!tokens.get(2).equals("*")) {
-                builder.setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))));
-            }
-
-            List<LocalDate> period = parseDates(tokens.get(4));
-            builder.setFromDate(period.get(0));
-
-            if (period.size() == 2) {
-                builder.setToDate(period.get(1));
-            }
-
-            return builder.build();
-        } catch (RuntimeException exception) {
-            throw new RuntimeException("Invalid query record " + tokens, exception);
+        if (!tokens.get(1).equals("*")) {
+            builder.setService(parseService(parseNumericTokens(tokens.get(1))));
         }
+
+        if (!tokens.get(2).equals("*")) {
+            builder.setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))));
+        }
+
+        List<LocalDate> period = parseDates(tokens.get(4));
+        builder.setFromDate(period.get(0));
+
+        if (period.size() == 2) {
+            builder.setToDate(period.get(1));
+        }
+
+        return builder.build();
     }
 
     private static ResponseEntry parseResponseEntry(List<String> tokens) {
         if (tokens.size() != NUMBER_OF_ELEMENTS_IN_THE_RESPONSE_RECORD) {
-            throw new RuntimeException("Invalid response record " + tokens);
+            throw new ParseException("Invalid response record. Number of elements is incorrect. ");
         }
 
-        try {
-            return new ResponseEntry.Builder()
-                    .setService(parseService(parseNumericTokens(tokens.get(1))))
-                    .setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))))
-                    .setResponseType(parseResponseType(tokens.get(3)))
-                    .setDate(parseDate(tokens.get(4)))
-                    .setDuration(parseDuration(tokens.get(5)))
-                    .build();
-        } catch (RuntimeException exception) {
-            throw new RuntimeException("Invalid response record " + tokens, exception);
-        }
+        return new ResponseEntry.Builder()
+                .setService(parseService(parseNumericTokens(tokens.get(1))))
+                .setQuestion(parseQuestion(parseNumericTokens(tokens.get(2))))
+                .setResponseType(parseResponseType(tokens.get(3)))
+                .setDate(parseDate(tokens.get(4)))
+                .setDuration(parseDuration(tokens.get(5)))
+                .build();
     }
 
     private static Service parseService(List<Integer> numbers) {
@@ -147,7 +140,7 @@ final class LogProcessor {
             return new Service(numbers.get(0), numbers.get(1));
         }
 
-        throw new RuntimeException("To much elements for service" + numbers);
+        throw new ParseException("To much elements for service " + numbers);
     }
 
     private static Question parseQuestion(List<Integer> numbers) {
@@ -159,7 +152,7 @@ final class LogProcessor {
             return new Question(numbers.get(0), new Question.QuestionCategory(numbers.get(1), numbers.get(2)));
         }
 
-        throw new RuntimeException("To much elements for question" + numbers);
+        throw new ParseException("To much elements for question " + numbers);
     }
 
     private static ResponseType parseResponseType(String token) {
@@ -171,7 +164,7 @@ final class LogProcessor {
             return ResponseType.NEXT_ANSWER;
         }
 
-        throw new RuntimeException("Invalid response type + " + token);
+        throw new ParseException("Invalid response type + " + token);
     }
 
     private static Duration parseDuration(String token) {

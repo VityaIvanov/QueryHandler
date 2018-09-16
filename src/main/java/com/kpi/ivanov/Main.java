@@ -12,14 +12,14 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length != 2) {
-            throw new RuntimeException("Invalid number of paths to files. Must be 2 paths to files");
+            throw new ParseException("Invalid number of paths to files. Must be 2 paths to files");
         }
 
         try(InputStream in = Files.newInputStream(Paths.get(args[0]));
             OutputStream out = Files.newOutputStream(Paths.get(args[1]))){
             new LogProcessor(Main::calculateAverageResponseTime).process(in, out);
-        } catch (RuntimeException exception) {
-            System.out.println("Exception during parsing " + exception);
+        } catch (ParseException exception) {
+            System.out.println("Exception during parsing " + exception + "\n" + exception.getCause());
         } catch (IOException exception) {
             System.out.println("Exception during reading or writing data " + exception);
         }

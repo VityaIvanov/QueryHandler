@@ -4,15 +4,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.OptionalDouble;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -22,48 +18,41 @@ public class MainTest {
     public static Collection input() {
         return Arrays.asList(
                 new Object[][]{
-                        {new File("src/test/resources/input/input0"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer0")},
-                        {new File("src/test/resources/input/input1"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer1")},
-                        {new File("src/test/resources/input/input2"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer2")},
-                        {new File("src/test/resources/input/input3"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer3")},
-                        {new File("src/test/resources/input/input4"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer4")},
-                        {new File("src/test/resources/input/input5"),
-                                new File("src/test/resources/mainTestAnswers/rightAnswer5")},
+                        {"src/test/resources/input/input0",
+                                "src/test/resources/mainTest/output/output0",
+                                "src/test/resources/mainTest/answers/rightAnswer0"},
+                        {"src/test/resources/input/input1",
+                                "src/test/resources/mainTest/output/output1",
+                                "src/test/resources/mainTest/answers/rightAnswer1"},
+                        {"src/test/resources/input/input2",
+                                "src/test/resources/mainTest/output/output2",
+                                "src/test/resources/mainTest/answers/rightAnswer2"},
+                        {"src/test/resources/input/input3",
+                                "src/test/resources/mainTest/output/output3",
+                                "src/test/resources/mainTest/answers/rightAnswer3"},
+                        {"src/test/resources/input/input4",
+                                "src/test/resources/mainTest/output/output4",
+                                "src/test/resources/mainTest/answers/rightAnswer4"},
+                        {"src/test/resources/input/input5",
+                                "src/test/resources/mainTest/output/output5",
+                                "src/test/resources/mainTest/answers/rightAnswer5"},
                 }
         );
     }
 
-    private File in;
-    private File answer;
+    private String in;
+    private String out;
+    private String answer;
 
-    public MainTest(File in, File answer) {
+    public MainTest(String in, String out, String answer) {
         this.in = in;
+        this.out = out;
         this.answer = answer;
     }
 
     @Test
-    public void test() {
-        try (InputStream inputStream = new FileInputStream(in);
-             ByteArrayOutputStream out = new ByteArrayOutputStream()){
-            new LogProcessor(responseEntries -> {
-                OptionalDouble averageTime = responseEntries.stream()
-                        .mapToDouble(entry -> entry.getResponseTime().toMinutes()).average();
-
-                if (!averageTime.isPresent()) {
-                    return "-";
-                }
-
-                return Long.toString(Math.round(averageTime.getAsDouble()));
-            }).process(inputStream, out);
-
-            assertArrayEquals(out.toByteArray(), Files.readAllBytes(answer.toPath()));
-        } catch (IOException exception) {
-            System.out.println("Exception during the test " + exception);
-        }
+    public void testAverageResponseTime() throws IOException {
+            Main.main(new String[] {in, out});
+            assertArrayEquals(Files.readAllBytes(Paths.get(out)), Files.readAllBytes(Paths.get(answer)));
     }
 }

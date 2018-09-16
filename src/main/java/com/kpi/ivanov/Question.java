@@ -28,7 +28,7 @@ final class Question {
     private static void checkType(int type) {
         if (type < 1 || type > 10) {
             throw new IllegalArgumentException("Invalid value for question type. " +
-                    "The type can take values from 1 to 10 but not the" + type);
+                    "The type can take values from 1 to 10 but not the " + type);
         }
     }
 
@@ -62,7 +62,7 @@ final class Question {
         private static void checkCategory(int category) {
             if (category < 1 || category > 20) {
                 throw new IllegalArgumentException("Invalid value for service type. " +
-                        "The type can take values from 1 to 20 but not the" + category);
+                        "The type can take values from 1 to 20 but not the " + category);
             }
         }
 
