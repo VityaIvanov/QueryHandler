@@ -58,7 +58,7 @@ final class Question {
             return category == questionCategory.category &&
                     (questionCategory.subCategory == null || questionCategory.subCategory.equals(subCategory));
         }
-        
+
         private static void checkCategory(int category) {
             if (category < 1 || category > 20) {
                 throw new IllegalArgumentException("Invalid value for service type. " +

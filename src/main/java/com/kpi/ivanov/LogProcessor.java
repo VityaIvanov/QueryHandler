@@ -39,7 +39,7 @@ final class LogProcessor {
 
     /**
      * Input stream is used to handling date without putting it all in computer memory.
-     * Can throw RuntimeException.
+     * Throws RuntimeException in case of IOException or Parsing exception.
      */
     void process(InputStream in, OutputStream out) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -87,8 +87,8 @@ final class LogProcessor {
         }
 
         try {
-            QueryEntry.Builder builder = new QueryEntry.Builder().
-                    setResponseType(parseResponseType(tokens.get(3)));
+            QueryEntry.Builder builder = new QueryEntry.Builder()
+                    .setResponseType(parseResponseType(tokens.get(3)));
 
             if (!tokens.get(1).equals("*")) {
                 builder.setService(parseService(parseNumericTokens(tokens.get(1))));

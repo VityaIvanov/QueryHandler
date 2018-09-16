@@ -12,27 +12,28 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.OptionalDouble;
 
 import static org.junit.Assert.assertArrayEquals;
 
 @RunWith(Parameterized.class)
-public class LogProcessorTest {
+public class MainTest {
     @Parameterized.Parameters
     public static Collection input() {
         return Arrays.asList(
                 new Object[][]{
                         {new File("src/test/resources/input/input0"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer0")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer0")},
                         {new File("src/test/resources/input/input1"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer1")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer1")},
                         {new File("src/test/resources/input/input2"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer2")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer2")},
                         {new File("src/test/resources/input/input3"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer3")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer3")},
                         {new File("src/test/resources/input/input4"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer4")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer4")},
                         {new File("src/test/resources/input/input5"),
-                                new File("src/test/resources/logProcessorTestAnswers/rightAnswer5")},
+                                new File("src/test/resources/mainTestAnswers/rightAnswer5")},
                 }
         );
     }
@@ -40,7 +41,7 @@ public class LogProcessorTest {
     private File in;
     private File answer;
 
-    public LogProcessorTest(File in, File answer) {
+    public MainTest(File in, File answer) {
         this.in = in;
         this.answer = answer;
     }
@@ -48,20 +49,21 @@ public class LogProcessorTest {
     @Test
     public void test() {
         try (InputStream inputStream = new FileInputStream(in);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()){
             new LogProcessor(responseEntries -> {
-                long result = responseEntries.stream().map(ResponseEntry::toString).count();
-                if (result == 0) {
+                OptionalDouble averageTime = responseEntries.stream()
+                        .mapToDouble(entry -> entry.getResponseTime().toMinutes()).average();
+
+                if (!averageTime.isPresent()) {
                     return "-";
                 }
 
-                return Long.toString(result);
-            }).process(inputStream, outputStream);
+                return Long.toString(Math.round(averageTime.getAsDouble()));
+            }).process(inputStream, out);
 
-            assertArrayEquals(outputStream.toByteArray(), Files.readAllBytes(answer.toPath()));
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            assertArrayEquals(out.toByteArray(), Files.readAllBytes(answer.toPath()));
+        } catch (IOException exception) {
+            System.out.println("Exception during the test");
         }
     }
 }

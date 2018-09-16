@@ -1,20 +1,28 @@
 package com.kpi.ivanov;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.OptionalDouble;
 import java.util.Set;
 
 public class Main {
 
     public static void main(String[] args) {
-        try {
-            new LogProcessor(Main::calculateAverageResponseTime)
-                    .process(new FileInputStream(new File(args[0])),
-                            new FileOutputStream(new File(args[1])));
-        } catch (Exception exception) {
+
+        for (String s: args) {
+            System.out.println(s);
+        }
+
+        try(InputStream in = Files.newInputStream(Paths.get(args[0]));
+            OutputStream out = Files.newOutputStream(Paths.get(args[1]))){
+            new LogProcessor(Main::calculateAverageResponseTime).process(in, out);
+        } catch (RuntimeException exception) {
             System.out.println("Exception during parsing " + exception);
+        } catch (IOException exception) {
+            System.out.println("Exception during reading or writing data" + exception);
         }
     }
 
@@ -27,5 +35,9 @@ public class Main {
         }
 
         return Long.toString(Math.round(averageTime.getAsDouble()));
+    }
+
+    private void checkInputingFilesPaths(String[] paths) {
+
     }
 }
